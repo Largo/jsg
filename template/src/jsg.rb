@@ -4,8 +4,6 @@
 require 'js'
 
 module JSGPatch
-  include Enumerable # Make it possible to enumerate JS:Objects. Example: JS.global.document.querySelectorAll("div").each do
-
   def self.included(base)
     base.extend ClassMethods
   end
@@ -150,16 +148,19 @@ module JSGPatch
 
     return super(sym, *args, &block)
   end
+
 end
 
 # Applying the JSG module to JS::Object to patch existing methods and add new ones
 class JS::Object
   include JSGPatch
+
 end
 
 # Extending the JS module to include new class methods
 module JS
   extend JSGPatch::ClassMethods
+
 end
 
 module JSG
