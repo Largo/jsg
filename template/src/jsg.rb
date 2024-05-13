@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "jsg/version"
+#require_relative "jsg/version"
 require 'js'
 
 module JSGPatch
@@ -109,7 +109,7 @@ module JSGPatch
   end
 
   def method_missing(sym, *args, &block)
-    return super if self === JS::Null
+    return super(sym, *args, &block) if self === JS::Null
     sym_str = sym.to_s
     sym = sym_str[0..-2].to_sym if sym_str.end_with?("?") or sym_str.end_with?("=")
     if sym_str.end_with?("?")
@@ -148,7 +148,7 @@ module JSGPatch
       return self[sym].to_rb
     end
 
-    return super
+    return super(sym, *args, &block)
   end
 end
 
@@ -195,4 +195,3 @@ module JSG
     JS.respond_to?(method, include_private) || super
   end
 end
-

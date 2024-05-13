@@ -13,3 +13,4 @@ gem "rubocop", "~> 1.21"
 
 gem "capybara"
 gem "selenium-webdriver"
+gem "ruby_wasm", "~> 2.6"

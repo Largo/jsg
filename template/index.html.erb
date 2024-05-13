@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= project_name %></title>
+    <script src="assets/browser.script.iife.js"></script>
+    <style>
+        body {
+            background: #212121;
+            font-size: 30px;
+            color: whitesmoke;
+            padding: 20px;
+        }
+        a, a:link,  a:visited {
+            color: #FF0000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<h1><%= project_name %></h1>
+<div id="spinner" class="spinner"></div>
+<script type="text/ruby" data-eval="async">
+    require 'js'
+    require 'js/require_remote'
+
+    app_path = __FILE__
+    $0 = File::basename(app_path, ".rb") if app_path
+
+
+    # This is only needed if you want to use require_relative instead of JSG build
+    module Kernel
+      alias original_require_relative require_relative
+      def require_relative(path)
+          JS::RequireRemote.instance.load(path)
+      end
+    end
+
+    require_relative "src/jsg"
+
+    $window = JSG.global
+    $d = $window.document
+    $d.getElementById("spinner").style.display = "none"
+
+  puts "testss"
+    $d.console.log("YAHAAA")
+</script>
+</body>
+</html>
