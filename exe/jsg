@@ -1,3 +1,59 @@
 #!/usr/bin/env ruby
 
-require "jsg"
+#require "jsg"
+
+require "erb"
+require "fileutils"
+
+module JSG
+  # create a new project at project_name
+  def self.create_project(project_name)
+    base_path = File.expand_path("../template", __dir__)
+    destination = File.join(Dir.pwd, project_name)
+
+    if Dir.exist?(destination)
+      puts "Sorry #{destination} already exists, please choose other name or delete the folder"
+      return
+    end
+    FileUtils.mkdir_p(destination)
+
+    Dir.glob("#{base_path}/**/*").each do |file_path|
+      next if File.directory?(file_path)
+
+      p file_path
+
+      content = File.read(file_path)
+      result = if file_path.end_with?(".erb")
+                 template = ERB.new(content)
+                 template.result(binding)
+               else
+                 content
+               end
+
+      relative_path = file_path.sub("#{base_path}/", "").gsub(/\.erb$/, "")
+      new_file_path = File.join(destination, relative_path)
+      FileUtils.mkdir_p(File.dirname(new_file_path))
+      File.write(new_file_path, result)
+    end
+  end
+end
+
+command = ARGV.shift # First argument is the command
+
+case command
+when "new"
+  #options = parse_options
+  project_name = ARGV.shift # Next argument should be the project name
+
+  if project_name
+    JSG.create_project(project_name)
+  else
+    puts "Error: Project name is required."
+    puts "For help, run: jsg new --help"
+    exit 1
+  end
+else
+  puts "Unknown command: #{command}"
+  puts "Use 'jsg new --help' for creating new projects."
+  exit 1
+end

@@ -44,7 +44,9 @@
 <h1>Ruby.wasm Quickstart</h1>
 <div id="spinner" class="spinner"></div>
 <script type="text/ruby" data-eval="async">
-    $window = JS.global
+    require 'jsg'
+
+    $window = JSG.global
     $d = $window.document
 
     $d.getElementById("spinner").style.display = "none"
@@ -53,26 +55,6 @@
         e.innerText = "Examples"
         $d.body.appendChild(e)
     }
-
-    examplesDiv = $d.createElement("div").tap {|div|
-        div.classList.add("examples")
-        $d.body.appendChild(div)
-    }
-    examples.each do |example|
-        $d.createElement("a").tap {|link|
-            link.href = "#{example}.html"
-            link.innerText = example
-            examplesDiv.appendChild(link)
-        }
-    end
-
-    if readmeMarkdown
-        $d.createElement("div").tap {|e|
-            e.classList.add("explanation")
-            e.innerHTML = Kramdown::Document.new(readmeMarkdown).to_html
-            $d.body.appendChild(e)
-        }
-    end
 </script>
 </body>
 </html>
