@@ -12,8 +12,7 @@ module JSG
     destination = File.join(Dir.pwd, project_name)
 
     if Dir.exist?(destination)
-      puts "Sorry #{destination} already exists, please choose other name or delete the folder"
-      return
+      raise "Sorry #{destination} already exists, please choose other name or delete the folder"
     end
     FileUtils.mkdir_p(destination)
 
@@ -32,6 +31,8 @@ module JSG
 
       relative_path = file_path.sub("#{base_path}/", "").gsub(/\.erb$/, "")
       new_file_path = File.join(destination, relative_path)
+
+      new_file_path.gsub!("gitignore", ".gitignore")
       FileUtils.mkdir_p(File.dirname(new_file_path))
       File.write(new_file_path, result)
     end
@@ -39,8 +40,26 @@ module JSG
 
   def self.build
     system("bundle install")
-    #　rbwasm --log-level debug build --ruby-version 3.3 --target wasm32-unknown-wasip1 --build-profile full
-    system("bundle exec rbwasm build -o assets/ruby-app.wasm")
+    system("rbwasm build -o assets/ruby-app.wasm")
+  end
+
+  def self.server
+    require 'webrick'
+
+    port = 8080
+    
+    loop do
+      begin
+        server = WEBrick::HTTPServer.new(BindAddres: '0.0.0.0', :Port => port, :DocumentRoot => Dir.pwd)
+        trap('INT') { server.shutdown }
+        puts "Serving at port http://0.0.0.0.:#{port}"
+        server.start
+        break
+      rescue Errno::EADDRINUSE
+        port += 1
+      end
+    end
+    
   end
 end
 
@@ -52,18 +71,27 @@ when "new"
   project_name = ARGV.shift # Next argument should be the project name
 
   if project_name
-    JSG.create_project(project_name)
+    begin
+      JSG.create_project(project_name)
     # check if we have an internet connection or think about caching this somewhere. 
-    JSG.build
+      Dir.chdir(project_name) do
+        JSG.build
+      end
+    rescue StandardError => e 
+    end
   else
     puts "Error: Project name is required."
-    puts "For help, run: jsg new --help"
+    #puts "For help, run: jsg new --help"
     exit 1
   end
 when "build"
   JSG.build
+when "serve", "server"
+  JSG.server
 else
   puts "Unknown command: #{command}"
-  puts "Use 'jsg new --help' for creating new projects."
+  puts "Use 'jsg new projectname' for creating new projects."
+  puts "Use 'jsg build to build the .wasm file of the project."
+  puts "Use 'jsg server to start a server."
   exit 1
 end
