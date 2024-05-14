@@ -13,3 +13,4 @@
 *.wasm
 examples/build
 examples/rubies
+/test

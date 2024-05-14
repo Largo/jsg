@@ -13,7 +13,7 @@ module JSG
 
     if Dir.exist?(destination)
       puts "Sorry #{destination} already exists, please choose other name or delete the folder"
-      # return
+      return
     end
     FileUtils.mkdir_p(destination)
 

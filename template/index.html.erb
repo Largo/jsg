@@ -41,6 +41,7 @@
 <script type="text/ruby" data-eval="async">
     require 'js'
     require 'js/require_remote'
+    require 'jsg'
 
     app_path = __FILE__
     $0 = File::basename(app_path, ".rb") if app_path
@@ -54,14 +55,14 @@
       end
     end
 
-    require_relative "src/jsg"
-
     $window = JSG.global
     $d = $window.document
     $d.getElementById("spinner").style.display = "none"
 
-  puts "testss"
-    $d.console.log("YAHAAA")
+    puts "test"
+    JS.global[:console].log("test")
+    JS.global.console.log("yes")
+
 </script>
 </body>
 </html>

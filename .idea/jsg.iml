@@ -16,7 +16,9 @@
     <orderEntry type="library" scope="PROVIDED" name="base64 (v0.2.0, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="bundler (v2.5.9, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="capybara (v3.40.0, asdf: 3.2.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="cgi (v0.4.1, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.5.1, asdf: 3.2.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="erb (v4.0.2, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="js (v2.6.0, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="json (v2.7.2, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="language_server-protocol (v3.17.0.3, asdf: 3.2.3) [gem]" level="application" />
@@ -41,6 +43,7 @@
     <orderEntry type="library" scope="PROVIDED" name="rubocop (v1.63.4, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rubocop-ast (v1.31.3, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="ruby-progressbar (v1.13.0, asdf: 3.2.3) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ruby_wasm (v2.6.0, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="rubyzip (v2.3.2, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="selenium-webdriver (v4.19.0, asdf: 3.2.3) [gem]" level="application" />
     <orderEntry type="library" scope="PROVIDED" name="unicode-display_width (v2.5.0, asdf: 3.2.3) [gem]" level="application" />
