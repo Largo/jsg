@@ -36,6 +36,12 @@ module JSG
       File.write(new_file_path, result)
     end
   end
+
+  def self.build
+    system("bundle install")
+    #　rbwasm --log-level debug build --ruby-version 3.3 --target wasm32-unknown-wasip1 --build-profile full
+    system("bundle exec rbwasm build -o assets/ruby-app.wasm")
+  end
 end
 
 command = ARGV.shift # First argument is the command
@@ -47,15 +53,15 @@ when "new"
 
   if project_name
     JSG.create_project(project_name)
+    # check if we have an internet connection or think about caching this somewhere. 
+    JSG.build
   else
     puts "Error: Project name is required."
     puts "For help, run: jsg new --help"
     exit 1
   end
 when "build"
-  system("bundle install")
-  #　rbwasm --log-level debug build --ruby-version 3.3 --target wasm32-unknown-wasip1 --build-profile full
-  system("bundle exec rbwasm build -o assets/ruby-app.wasm")
+  JSG.build
 else
   puts "Unknown command: #{command}"
   puts "Use 'jsg new --help' for creating new projects."
