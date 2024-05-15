@@ -19,8 +19,7 @@ module JSG
     Dir.glob("#{base_path}/**/*").each do |file_path|
       next if File.directory?(file_path)
 
-      p file_path
-
+      
       content = File.read(file_path)
       result = if file_path.end_with?(".erb")
                  template = ERB.new(content)
@@ -31,6 +30,8 @@ module JSG
 
       relative_path = file_path.sub("#{base_path}/", "").gsub(/\.erb$/, "")
       new_file_path = File.join(destination, relative_path)
+
+      p new_file_path
 
       new_file_path.gsub!("gitignore", ".gitignore")
       FileUtils.mkdir_p(File.dirname(new_file_path))

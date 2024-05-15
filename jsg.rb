@@ -154,6 +154,7 @@ end
 # Applying the JSG module to JS::Object to patch existing methods and add new ones
 class JS::Object
   include JSGPatch
+
 end
 
 # Extending the JS module to include new class methods
@@ -163,6 +164,8 @@ module JS
 end
 
 module JSG
+  class Error < StandardError; end
+
   def self.window(*args)
     JS.send(:global, *args)
   end
@@ -178,6 +181,8 @@ module JSG
   singleton_class.alias_method :w, :window
   singleton_class.alias_method :d, :document
   singleton_class.alias_method :q, :querySelectorAll
+
+
 
   def self.method_missing(method, *args, &block)
     if JS.respond_to?(method)
