@@ -33,11 +33,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  # Uncomment to register a new dependency of your gem
-  # spec.add_dependency "example-gem", "~> 1.0"
-  spec.add_dependency "erb" # figure out how to only include this outside ruby_wasm
-  spec.add_dependency "js", "~> 2.6"
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_dependency "erb" unless RUBY_PLATFORM.start_with? "wasm"
+  spec.add_dependency "ruby_wasm" unless RUBY_PLATFORM.start_with? "wasm"
+  spec.add_dependency "js", "~> 2.6" if RUBY_PLATFORM.start_with? "wasm"
 end
