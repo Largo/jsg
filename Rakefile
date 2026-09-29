@@ -9,4 +9,14 @@ require "rubocop/rake_task"
 
 RuboCop::RakeTask.new
 
-task default: %i[spec rubocop]
+namespace :test do
+  desc "Run the lib/jsg.rb tests inside ruby.wasm on Node.js (needs node and npm)"
+  task :wasm do
+    Dir.chdir("test/wasm") do
+      sh "npm ci"
+      sh "npm test"
+    end
+  end
+end
+
+task default: %i[spec test:wasm rubocop]

@@ -39,30 +39,14 @@
 <h1><%= project_name %></h1>
 <div id="spinner" class="spinner"></div>
 <script type="text/ruby" data-eval="async">
-    require 'js'
-    require 'js/require_remote'
-    require 'jsg'
+    require "js/require_remote"
+    require "jsg"
 
-    app_path = __FILE__
-    $0 = File::basename(app_path, ".rb") if app_path
+    JSG.document.getElementById("spinner").style.display = "none"
 
-
-    # This is only needed if you want to use require_relative instead of JSG build
-    module Kernel
-      alias original_require_relative require_relative
-      def require_relative(path)
-          JS::RequireRemote.instance.load(path)
-      end
-    end
-
-    $window = JSG.global
-    $d = $window.document
-    $d.getElementById("spinner").style.display = "none"
-
-    puts "test"
-    JS.global[:console].log("test")
-    JS.global.console.log("yes")
-
+    # Loads src/main.rb from the web server. rbwasm build only packs Ruby
+    # and the gems into assets/ruby-app.wasm, not your own files.
+    JS::RequireRemote.instance.load("src/main")
 </script>
 </body>
 </html>

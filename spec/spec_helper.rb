@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-require "jsg"
+# These specs run on the host Ruby. lib/jsg.rb needs the js gem, which only
+# works inside ruby.wasm, so it is tested separately in test/wasm.
+require "jsg/cli"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

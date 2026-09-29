@@ -2,4 +2,9 @@
 
 source "https://rubygems.org"
 
-gem 'jsg'
+# ruby_wasm provides the rbwasm build tool, js is the JavaScript bridge used
+# inside the browser. Keep both on the same version as
+# assets/browser.script.iife.js (ruby.wasm 2.10.1).
+gem "ruby_wasm", "~> 2.10.1"
+gem "js", "~> 2.10.1"
+gem "jsg", "~> 0.2"

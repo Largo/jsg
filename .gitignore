@@ -13,4 +13,7 @@
 *.wasm
 examples/build
 examples/rubies
-/test
+# scratch projects created with `jsg new test`
+/test/*
+!/test/wasm/
+test/wasm/node_modules/

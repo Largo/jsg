@@ -1,0 +1,13 @@
+{
+  "name": "jsg-wasm-test",
+  "private": true,
+  "type": "module",
+  "description": "Runs lib/jsg.rb inside ruby.wasm on Node.js",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "dependencies": {
+    "@ruby/4.0-wasm-wasi": "2.10.1",
+    "@ruby/wasm-wasi": "2.10.1"
+  }
+}

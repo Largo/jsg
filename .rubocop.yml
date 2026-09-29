@@ -1,8 +1,56 @@
 AllCops:
   TargetRubyVersion: 3.0
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - "examples/**/*"
+    - "template/**/*"
+    - "test/wasm/node_modules/**/*"
+    - "vendor/**/*"
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+# method_missing and the CLI dispatcher are long by nature.
+Metrics/MethodLength:
+  Max: 30
+  Exclude:
+    - "test/**/*"
+Metrics/AbcSize:
+  Max: 30
+  Exclude:
+    - "test/**/*"
+Metrics/CyclomaticComplexity:
+  Max: 12
+  Exclude:
+    - "test/**/*"
+Metrics/PerceivedComplexity:
+  Max: 12
+  Exclude:
+    - "test/**/*"
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*"
+
+# The wasm test runner is one long list of checks.
+Metrics/ModuleLength:
+  Exclude:
+    - "test/**/*"
+
+# JavaScript numbers become Floats, and the tests compare exact values on purpose.
+Lint/FloatComparison:
+  Exclude:
+    - "test/**/*"
+
+# lib/jsg.rb patches JS::Object and JS next to its own modules on purpose.
+Style/OneClassPerFile:
+  Exclude:
+    - "lib/jsg.rb"
+
+# Requiring MFA for pushes is the gem owner's call, not a lint.
+Gemspec/RequireMFA:
+  Enabled: false
