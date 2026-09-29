@@ -113,7 +113,7 @@ git push origin v0.2.1
 
 The `Release` workflow runs the tests and publishes the gem to RubyGems.org with trusted publishing, so no API key is stored in GitHub.
 
-The specs in `spec/` test the command line tool on your normal Ruby. `lib/jsg.rb` needs the js gem, which only works inside ruby.wasm, so its tests in `test/wasm` run the prebuilt ruby.wasm on Node.js (`bundle exec rake test:wasm`, needs Node.js and npm).
+The specs in `spec/` test the command line tool on your normal Ruby. `lib/jsg.rb` needs the js gem, which only works inside ruby.wasm, so its tests in `test/wasm` run the prebuilt ruby.wasm on Node.js (`bundle exec rake test:wasm`, needs Node.js 24 or newer and npm).
 
 ## License
 

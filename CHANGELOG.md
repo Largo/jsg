@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-29
+
+- First release published from GitHub Actions with RubyGems trusted publishing (`.github/workflows/release.yml`, triggered by `v*` tags).
+- CI runs the ruby.wasm tests on Node.js 24. Node 22's WASI crashes once Ruby loads files from a mounted directory.
+
 ## [0.2.0] - 2026-09-29
 
 - Fix `require "jsg"`: the library moved from the gem root to `lib/jsg.rb`, so it is on the load path.
