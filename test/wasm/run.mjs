@@ -11,6 +11,12 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const wasm = path.join(here, "node_modules/@ruby/4.0-wasm-wasi/dist/ruby+stdlib.wasm");
 const module = await WebAssembly.compile(await fs.readFile(wasm));
 
+/**
+ * Evaluates rubyCode in a new ruby.wasm VM with the gem's lib (or $JSG_LIB)
+ * on the load path and this test folder mounted at /jsg-test.
+ * @param {string} rubyCode Ruby code whose last value is the test result.
+ * @returns {Promise<boolean>} true if the tests in rubyCode passed.
+ */
 async function runInFreshVM(rubyCode) {
   const wasi = new WASI({
     version: "preview1",
