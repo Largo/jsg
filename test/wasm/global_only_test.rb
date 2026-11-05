@@ -26,4 +26,5 @@ rescue Exception => e # rubocop:disable Lint/RescueException
   puts "FAIL #{name} (#{e.class}: #{e.message})"
 end
 puts "#{checks.size} tests, #{failures} failures"
-failures.zero?
+# `load` always returns true, so run.mjs reads the result from this global.
+$global_only_test_passed = failures.zero? # rubocop:disable Style/GlobalVars

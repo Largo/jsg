@@ -27,6 +27,6 @@ async function runInFreshVM(rubyCode) {
 
 const results = [
   await runInFreshVM(`load "/jsg-test/jsg_test.rb"; JSGTest.run`),
-  await runInFreshVM(`load "/jsg-test/global_only_test.rb"`),
+  await runInFreshVM(`load "/jsg-test/global_only_test.rb"; $global_only_test_passed`),
 ];
 process.exit(results.every(Boolean) ? 0 : 1);
