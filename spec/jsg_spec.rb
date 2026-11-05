@@ -13,7 +13,7 @@ RSpec.describe JSG do
 
     it "puts lib/jsg.rb on the load path" do
       expect(spec.require_paths).to eq(["lib"])
-      expect(spec.files).to include("lib/jsg.rb", "lib/jsg/version.rb", "lib/jsg/cli.rb")
+      expect(spec.files).to include("lib/jsg.rb", "lib/jsg/version.rb", "lib/jsg/cli.rb", "lib/jsg/global.rb")
     end
 
     it "ships the template that jsg new copies" do

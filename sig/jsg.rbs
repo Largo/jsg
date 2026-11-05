@@ -1,4 +1,9 @@
 module JSG
   VERSION: String
-  # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+
+  # require "jsg/global": forwards unknown methods on the JS module to JS.global
+  module Global
+    def method_missing: (Symbol name, *untyped args) ?{ (*untyped) -> untyped } -> untyped
+    def respond_to_missing?: (Symbol name, ?bool include_private) -> bool
+  end
 end

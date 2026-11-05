@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-05
+
+- New opt-in `require "jsg/global"`: unknown methods on the `JS` module are forwarded to `JS.global`, so `JS.document.title`, `JS.alert("Hi")` and `JS.myValue = 1` work. Names the `JS` module already answers keep their meaning (`JS.global`, `JS.eval`, and Ruby's own module methods such as `JS.name`). It loads `jsg` too. `require "jsg"` alone does not change the `JS` module.
+- The ruby.wasm tests run every test file in a fresh VM, so a file that only requires `jsg/global` is tested on its own.
+
 ## [0.2.1] - 2026-09-29
 
 - First release published from GitHub Actions with RubyGems trusted publishing (`.github/workflows/release.yml`, triggered by `v*` tags).
