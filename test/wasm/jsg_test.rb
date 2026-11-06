@@ -33,6 +33,7 @@ module JSGTest
 
   def self.run # rubocop:disable Naming/PredicateMethod
     tests
+    global_tests # last: requiring jsg/global changes the JS module for good
     puts "#{@count} tests, #{@failures} failures"
     @failures.zero?
   end
@@ -144,5 +145,35 @@ module JSGTest
     test("JSG.eval is forwarded to JS") { JSG.eval("return 2").to_rb == 2.0 }
     test("JSG.document without a DOM") { JSG.document.undefined? }
     test("JSG::VERSION") { JSG::VERSION.is_a?(String) }
+  end
+
+  # require "jsg/global": JS.xxx is forwarded to JS.global (opt-in)
+  def self.global_tests
+    JS.eval(<<~JS)
+      globalThis.jsgGlobalTest = { answer: 42, greet(name) { return "hi " + name } };
+      globalThis.format = () => "js format";
+    JS
+
+    test("require \"jsg\" alone does not forward JS.xxx") { raises?(NoMethodError) { JS.jsgGlobalTest } }
+    test("require \"jsg\" alone: JS.respond_to? is false") { !JS.respond_to?(:jsgGlobalTest) }
+
+    require "jsg/global"
+
+    test("JS.xxx reads a global") { JS.jsgGlobalTest.answer.eql?(42.0) }
+    test("JS.xxx calls a global's method") { JS.jsgGlobalTest.greet("ruby") == "hi ruby" }
+    test("JS.xxx = sets a global") do
+      JS.jsgSetByRuby = 5
+      JS.global[:jsgSetByRuby].to_rb.eql?(5.0)
+    end
+    test("JS.xxx? uses JavaScript truthiness") { JS.jsgGlobalTest?.equal?(true) && JS.jsgMissing?.equal?(false) }
+    test("JS.respond_to? for globals") { JS.respond_to?(:jsgGlobalTest) && !JS.respond_to?(:jsgMissing) }
+    test("unknown global raises NoMethodError") { raises?(NoMethodError) { JS.jsgMissing } }
+    test("private Kernel method name is forwarded") { JS.format == "js format" }
+    test("Module#name keeps its Ruby meaning") { JS.name == "JS" }
+    test("JS.global still works") { JS.global.jsgGlobalTest.answer == 42.0 }
+    test("JS.eval is still the js gem's eval") { JS.eval("return 3").to_rb == 3.0 }
+    test("JS constants still work") { JS::Null.nil? && JS::Object.ancestors.first == JSGPatch }
+    test("JSG.xxx is forwarded too") { JSG.jsgGlobalTest.answer == 42.0 }
+    test("JS is extended with JSG::Global") { JS.singleton_class.include?(JSG::Global) }
   end
 end

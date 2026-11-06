@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jsg (0.2.1)
+    jsg (0.3.0)
       js (~> 2.10)
       ruby_wasm (~> 2.10)
 
@@ -60,6 +60,8 @@ GEM
       logger
     ruby_wasm (2.10.1-arm64-darwin)
       logger
+    ruby_wasm (2.10.1-x64-mingw-ucrt)
+      logger
     ruby_wasm (2.10.1-x86_64-darwin)
       logger
     ruby_wasm (2.10.1-x86_64-linux)
@@ -75,6 +77,7 @@ PLATFORMS
   aarch64-linux-musl
   arm64-darwin
   ruby
+  x64-mingw-ucrt
   x86_64-darwin
   x86_64-linux
   x86_64-linux-musl
@@ -87,9 +90,10 @@ DEPENDENCIES
 
 CHECKSUMS
   ast (2.4.3) sha256=954615157c1d6a382bc27d690d973195e79db7f55e9765ac7c481c60bdb4d383
+  bundler (4.0.18) sha256=02d9a17429de1847b4e0c9f27a9ee4b20c0a74c0a641b4e77195d6019e3618ac
   diff-lcs (1.6.2) sha256=9ae0d2cba7d4df3075fe8cd8602a8604993efc0dfa934cff568969efb1909962
   js (2.10.1) sha256=c5fb88c60ea936234f818ff240f2ab0c42a57c25ab9b575211fcc4d702d059fb
-  jsg (0.2.1)
+  jsg (0.3.0)
   json (3.0.2) sha256=8e6d7e7b11384c21230430cef90b71f14849a34a1f4452796670f7c981bd19df
   language_server-protocol (3.17.0.6) sha256=5ef2c0c138f8267e1bc631d3328347d354f96724b0af22f2c79516120443b7f0
   lint_roller (1.1.0) sha256=2c0c845b632a7d172cb849cc90c1bce937a28c5c8ccccb50dfd46a485003cc87
@@ -113,6 +117,7 @@ CHECKSUMS
   ruby_wasm (2.10.1-aarch64-linux) sha256=133ab6ad86ff2942a4dd187ae2af87a42bbb31b42fd1ac82f738cbf658649c17
   ruby_wasm (2.10.1-aarch64-linux-musl) sha256=b92cfb5168d95837fb051c29e395c65129ef469ddd557f498948d1f20eb5bab7
   ruby_wasm (2.10.1-arm64-darwin) sha256=f106a9b4d8b273592471005460f8c54d89a8913e4fecb9dbab3bd3fc8c20bbc6
+  ruby_wasm (2.10.1-x64-mingw-ucrt) sha256=19be25d39bb980020106ed9bc5c5510e263bf65f4a9e6bdd2e20e27ec492375e
   ruby_wasm (2.10.1-x86_64-darwin) sha256=40291bed5b48c858317a31437e59d56091edda2f2c498b532238eda4cbf044d4
   ruby_wasm (2.10.1-x86_64-linux) sha256=728e29dc688246572b56dcef1c7b131431d07865320c9b8434dd1ccdfd63db2b
   ruby_wasm (2.10.1-x86_64-linux-musl) sha256=c4d16572f9a465e460490d0608e817239c5e0ddfc9553f18db2bcaebecbcdd8d

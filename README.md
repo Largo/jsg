@@ -97,6 +97,29 @@ el.tap { |e| ... } # like Kernel#tap (JS::Object is a BasicObject since js 2.10)
 value == true     # comparing with true, false and nil works (JavaScript's == rules)
 ```
 
+### `JS.document` instead of `JS.global.document` (opt-in)
+
+`require "jsg/global"` forwards unknown methods on the `JS` module to `JS.global`. It loads `jsg` as well, so this one line is enough:
+
+```ruby
+require "jsg/global"
+
+JS.document.title             # JS.global.document.title
+JS.alert("Hello")             # JS.global.alert("Hello")
+JS.localStorage.getItem("k")
+JS.myValue = 1                # sets window.myValue
+JS.hidden?                    # JavaScript truthiness, like the ? methods above
+```
+
+It is not part of `require "jsg"` because it changes the `JS` module itself, which the js gem and other libraries use too. Load it when you want the shorter syntax in your own app.
+
+Only names that `JS` does not already answer are forwarded. These keep their Ruby meaning, so use `JS.global` for a browser global of the same name:
+
+- methods of the js gem: `JS.global`, `JS.eval`, `JS.try_convert`, `JS.is_a?`, ...
+- methods every Ruby module has: `JS.name` (returns `"JS"`, not `window.name`), `JS.hash`, `JS.inspect`, `JS.class`, `JS.method`, `JS.display`, `JS.freeze`, ...
+
+Private `Kernel` methods such as `open`, `print` or `format` are forwarded, because calling them with an explicit receiver (`JS.open(...)`) ends up in `method_missing`. A name that the global object does not have raises `NoMethodError` as before. `JSG.xxx` forwards to `JS`, so after `require "jsg/global"` it reaches the globals too.
+
 ## Development
 
 ```bash
@@ -107,8 +130,8 @@ bundle exec rake    # rspec, the ruby.wasm tests and rubocop
 To release a new version, update `lib/jsg/version.rb` and `CHANGELOG.md`, commit, and push a matching tag:
 
 ```bash
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 The `Release` workflow runs the tests and publishes the gem to RubyGems.org with trusted publishing, so no API key is stored in GitHub.
