@@ -93,8 +93,35 @@ module JSG
 
     def build(strip: true)
       system("bundle", "install") or raise Error, "bundle install failed"
-      system(*rbwasm_build_command) or raise Error, "rbwasm build failed"
+      system(*homebrew_env, *rbwasm_build_command) or raise Error, "rbwasm build failed"
       strip_debug_info if strip
+    end
+
+    # With Homebrew (macOS or Linuxbrew), pkg-config may only see openssl@3:
+    # - rbwasm builds a native Ruby for the host first, and its openssl
+    #   extension does not compile against OpenSSL 4, Homebrew's default.
+    # - psych asks pkg-config for libyaml before it uses rbwasm's WebAssembly
+    #   libyaml, and would link Homebrew's native libyaml into the wasm.
+    # Returns [] (no env change) without brew or when PKG_CONFIG_LIBDIR is set.
+    def homebrew_env
+      return [] if ENV.key?("PKG_CONFIG_LIBDIR")
+
+      prefix = brew_prefix("openssl@3")
+      return [] unless prefix
+
+      libdir = File.join(prefix, "lib/pkgconfig")
+      unless File.directory?(libdir)
+        warn "warning: openssl@3 not found, the build fails with OpenSSL 4. Run: brew install openssl@3"
+      end
+      [{ "PKG_CONFIG_LIBDIR" => libdir }]
+    end
+
+    # `brew --prefix formula`, or nil when brew is not on the PATH.
+    def brew_prefix(formula)
+      prefix = IO.popen(["brew", "--prefix", formula], err: File::NULL, &:read).strip
+      prefix unless prefix.empty?
+    rescue SystemCallError
+      nil
     end
 
     # Runs rbwasm with RBWASM_PATCH loaded. The patch is required by absolute

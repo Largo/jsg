@@ -41,6 +41,16 @@ jsg server      # serve the folder on http://localhost:8080 (or the next free po
 
 After the build, `jsg build` strips the debug info from `assets/ruby-app.wasm` with binaryen's `wasm-opt --strip-debug` (about 51 MB down to 33 MB). It uses the `wasm-opt` that rbwasm downloads into `build/toolchain/binaryen`, or the one on your `PATH`. `jsg build --no-strip` keeps the debug info.
 
+### macOS
+
+You need the Xcode Command Line Tools (`xcode-select --install`) and OpenSSL 3 from Homebrew:
+
+```bash
+brew install openssl@3
+```
+
+rbwasm first builds a native Ruby for your Mac, and its openssl extension does not compile against OpenSSL 4, Homebrew's default. When `brew` is on your `PATH` (macOS or Linuxbrew), `jsg build` sets `PKG_CONFIG_LIBDIR` to openssl@3's `lib/pkgconfig` for rbwasm, so pkg-config finds OpenSSL 3 and nothing else from Homebrew. That also keeps Homebrew's native libyaml out of the WebAssembly build of psych, which would otherwise fail to link with `undefined symbol: yaml_get_version`. If you set `PKG_CONFIG_LIBDIR` yourself, `jsg build` leaves it alone.
+
 ### Ruby installed in /usr/local
 
 ruby_wasm 2.10.1 cannot compile C extensions such as the `js` gem when your Ruby 4.0 is installed with the prefix `/usr/local` (the default for Ruby built from source, and the official `ruby` Docker images). The cross-compiled Ruby uses the same prefix, so mkmf picks up your installed headers from `/usr/local/include/ruby-4.0.0` instead of the ones in `build/`, and the build stops with:

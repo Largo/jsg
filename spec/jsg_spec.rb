@@ -84,6 +84,7 @@ RSpec.describe JSG do
     end
 
     it "jsg build builds with the rbwasm patch and strips the debug info" do
+      allow(JSG::CLI).to receive(:brew_prefix).and_return(nil)
       commands = []
       allow(JSG::CLI).to receive(:system) { |*args| commands << args }
       expect(JSG::CLI.run(%w[build])).to eq(0)
@@ -94,7 +95,37 @@ RSpec.describe JSG do
       expect(commands[2]).to include("--strip-debug", "assets/ruby-app.wasm")
     end
 
+    it "jsg build points pkg-config at Homebrew's openssl@3 only" do
+      Dir.mkdir(File.join(@dir, "lib"))
+      Dir.mkdir(File.join(@dir, "lib/pkgconfig"))
+      allow(JSG::CLI).to receive(:brew_prefix).with("openssl@3").and_return(@dir)
+      commands = []
+      allow(JSG::CLI).to receive(:system) { |*args| commands << args }
+      expect { expect(JSG::CLI.run(%w[build --no-strip])).to eq(0) }.not_to output.to_stderr
+      expect(commands[1].first).to eq("PKG_CONFIG_LIBDIR" => File.join(@dir, "lib/pkgconfig"))
+      expect(commands[1][1..3]).to eq(%w[bundle exec ruby])
+    end
+
+    it "jsg build warns when Homebrew has no openssl@3" do
+      allow(JSG::CLI).to receive(:brew_prefix).with("openssl@3").and_return(File.join(@dir, "missing"))
+      allow(JSG::CLI).to receive(:system).and_return(true)
+      expect { JSG::CLI.run(%w[build --no-strip]) }.to output(/brew install openssl@3/).to_stderr
+    end
+
+    it "jsg build keeps a PKG_CONFIG_LIBDIR that is already set" do
+      allow(ENV).to receive(:key?).and_call_original
+      allow(ENV).to receive(:key?).with("PKG_CONFIG_LIBDIR").and_return(true)
+      expect(JSG::CLI).not_to receive(:brew_prefix)
+      expect(JSG::CLI.homebrew_env).to eq([])
+    end
+
+    it "brew_prefix is nil without brew" do
+      allow(IO).to receive(:popen).and_raise(Errno::ENOENT)
+      expect(JSG::CLI.brew_prefix("openssl@3")).to be_nil
+    end
+
     it "jsg build --no-strip keeps the debug info" do
+      allow(JSG::CLI).to receive(:brew_prefix).and_return(nil)
       commands = []
       allow(JSG::CLI).to receive(:system) { |*args| commands << args }
       expect(JSG::CLI.run(%w[build --no-strip])).to eq(0)
@@ -102,6 +133,7 @@ RSpec.describe JSG do
     end
 
     it "jsg build fails when rbwasm fails" do
+      allow(JSG::CLI).to receive(:brew_prefix).and_return(nil)
       allow(JSG::CLI).to receive(:system) { |*args| args[2] != "ruby" }
       expect { expect(JSG::CLI.run(%w[build])).to eq(1) }.to output(/rbwasm build failed/).to_stderr
     end
