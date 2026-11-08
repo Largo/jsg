@@ -7,7 +7,7 @@ It has two parts:
 - the `jsg` command, which creates, builds and serves a project
 - `require "jsg"` inside the browser, which lets you write `document.title` instead of `JS.global[:document][:title]`
 
-jsg 0.2 targets ruby.wasm 2.10.1 and builds Ruby 4.0 for the browser.
+jsg 0.3 targets ruby.wasm 2.10.1 and builds Ruby 4.0 for the browser.
 
 ## Installation
 
@@ -38,6 +38,33 @@ jsg server      # serve the folder on http://localhost:8080 (or the next free po
 - a `.gitignore` for the `build/` and `rubies/` folders
 
 `jsg build` runs `bundle install` and then `bundle exec rbwasm build --ruby-version 4.0 -o assets/ruby-app.wasm`. The wasm file contains Ruby and the gems from the Gemfile, not your own files: `index.html` fetches `src/main.rb` from the web server with `JS::RequireRemote`, so a page reload picks up your changes. Run `jsg build` again only when you change the Gemfile. The first build compiles CRuby and the gems for WebAssembly and takes a while. Later builds reuse the `build/` and `rubies/` folders.
+
+After the build, `jsg build` strips the debug info from `assets/ruby-app.wasm` with binaryen's `wasm-opt --strip-debug` (about 51 MB down to 33 MB). It uses the `wasm-opt` that rbwasm downloads into `build/toolchain/binaryen`, or the one on your `PATH`. `jsg build --no-strip` keeps the debug info.
+
+### macOS
+
+You need the Xcode Command Line Tools (`xcode-select --install`) and OpenSSL 3 from Homebrew:
+
+```bash
+brew install openssl@3
+```
+
+rbwasm first builds a native Ruby for your Mac, and its openssl extension does not compile against OpenSSL 4, Homebrew's default. When `brew` is on your `PATH` (macOS or Linuxbrew), `jsg build` sets `PKG_CONFIG_LIBDIR` to openssl@3's `lib/pkgconfig` for rbwasm, so pkg-config finds OpenSSL 3 and nothing else from Homebrew. That also keeps Homebrew's native libyaml out of the WebAssembly build of psych, which would otherwise fail to link with `undefined symbol: yaml_get_version`. If you set `PKG_CONFIG_LIBDIR` yourself, `jsg build` leaves it alone.
+
+### Ruby installed in /usr/local
+
+ruby_wasm 2.10.1 cannot compile C extensions such as the `js` gem when your Ruby 4.0 is installed with the prefix `/usr/local` (the default for Ruby built from source, and the official `ruby` Docker images). The cross-compiled Ruby uses the same prefix, so mkmf picks up your installed headers from `/usr/local/include/ruby-4.0.0` instead of the ones in `build/`, and the build stops with:
+
+```
+/usr/local/include/ruby-4.0.0/ruby/internal/config.h:22:10: fatal error: 'ruby/config.h' file not found
+```
+
+`jsg build` works around this: it runs rbwasm with `lib/jsg/rbwasm_patch.rb` loaded, which makes mkmf ignore the installed headers. If you call `rbwasm build` yourself, hide the headers during the build instead (Linux, as root):
+
+```bash
+rm -rf build/wasm32-unknown-wasip1/*-ext
+unshare -m sh -c 'mount -t tmpfs tmpfs /usr/local/include/ruby-4.0.0 && bundle exec rbwasm build --ruby-version 4.0 -o assets/ruby-app.wasm'
+```
 
 ## Syntax
 

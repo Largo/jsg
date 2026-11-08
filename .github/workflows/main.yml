@@ -31,3 +31,28 @@ jobs:
         node-version: '24'
     - name: Run the default task
       run: bundle exec rake
+
+  # A real `jsg new` + `jsg build` (compiles CRuby for WebAssembly, ~20 min).
+  wasm-build-macos:
+    name: jsg build on macOS
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '4.0'
+    - run: brew install openssl@3
+    - run: gem build jsg.gemspec && gem install --no-document jsg-*.gem webrick
+    - run: cd "$RUNNER_TEMP" && jsg new demo && ls -la demo/assets/ruby-app.wasm
+
+  # The official ruby images install Ruby into /usr/local, the prefix of the
+  # WebAssembly Ruby that rbwasm builds.
+  wasm-build-usr-local:
+    name: jsg build with Ruby in /usr/local
+    runs-on: ubuntu-latest
+    container: ruby:4.0
+    steps:
+    - uses: actions/checkout@v4
+    - run: apt-get update && apt-get install -y --no-install-recommends unzip
+    - run: gem build jsg.gemspec && gem install --no-document jsg-*.gem webrick
+    - run: cd "$RUNNER_TEMP" && jsg new demo && ls -la demo/assets/ruby-app.wasm

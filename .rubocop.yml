@@ -36,10 +36,12 @@ Metrics/BlockLength:
   Exclude:
     - "spec/**/*"
 
-# The wasm test runner is one long list of checks.
+# The wasm test runner is one long list of checks, and the CLI keeps every
+# command's helpers in one module.
 Metrics/ModuleLength:
   Exclude:
     - "test/**/*"
+    - "lib/jsg/cli.rb"
 
 # JavaScript numbers become Floats, and the tests compare exact values on purpose.
 Lint/FloatComparison:

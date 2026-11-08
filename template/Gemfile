@@ -7,4 +7,4 @@ source "https://rubygems.org"
 # assets/browser.script.iife.js (ruby.wasm 2.10.1).
 gem "ruby_wasm", "~> 2.10.1"
 gem "js", "~> 2.10.1"
-gem "jsg", "~> 0.2"
+gem "jsg", "~> 0.3"
