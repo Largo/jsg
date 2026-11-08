@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+- `jsg build` works when the host Ruby is installed in `/usr/local` (Ruby built from source, the official `ruby` Docker images). ruby_wasm 2.10.1 compiled the `js` extension against the host's installed headers there and failed with `'ruby/config.h' file not found`. `jsg build` now runs rbwasm with a patch (`lib/jsg/rbwasm_patch.rb`) that makes mkmf use the headers in `build/`.
+- `jsg build` strips the debug info from `assets/ruby-app.wasm` with `wasm-opt --strip-debug` (about 51 MB down to 33 MB). `jsg build --no-strip` keeps it.
+- The template's Gemfile depends on `jsg ~> 0.3`.
+
 ## [0.3.0] - 2026-11-05
 
 - New opt-in `require "jsg/global"`: unknown methods on the `JS` module are forwarded to `JS.global`, so `JS.document.title`, `JS.alert("Hi")` and `JS.myValue = 1` work. Names the `JS` module already answers keep their meaning (`JS.global`, `JS.eval`, and Ruby's own module methods such as `JS.name`). It loads `jsg` too. `require "jsg"` alone does not change the `JS` module.

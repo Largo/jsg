@@ -14,11 +14,19 @@ module JSG
     # Ruby version that `jsg build` compiles to WebAssembly. Matches the
     # @ruby/4.0-wasm-wasi browser script in template/assets.
     WASM_RUBY_VERSION = "4.0"
+    WASM_OUTPUT = "assets/ruby-app.wasm"
+    # Loaded into rbwasm by `jsg build`, see the comment in that file.
+    RBWASM_PATCH = File.expand_path("rbwasm_patch.rb", __dir__)
+    # rbwasm downloads binaryen into the project's build/toolchain folder.
+    WASM_OPT = "build/toolchain/binaryen/bin/wasm-opt"
+    WASM_OPT_FEATURES = %w[--enable-bulk-memory --enable-mutable-globals
+                           --enable-nontrapping-float-to-int --enable-sign-ext].freeze
 
     USAGE = <<~TEXT
       Usage:
         jsg new PROJECT [--skip-build]  create a new project (and build it)
-        jsg build                       bundle install, then build assets/ruby-app.wasm (Ruby 4.0)
+        jsg build [--no-strip]          bundle install, then build assets/ruby-app.wasm (Ruby 4.0)
+                                        and strip its debug info
         jsg server [PORT]               serve the current directory (default port 8080)
         jsg version                     print the jsg version
     TEXT
@@ -36,7 +44,7 @@ module JSG
         destination = create_project(project_name)
         Dir.chdir(destination) { build } unless skip_build
       when "build"
-        build
+        build(strip: argv.delete("--no-strip").nil?)
       when "serve", "server"
         server(port: Integer(argv.shift || 8080))
       when "version", "-v", "--version"
@@ -83,10 +91,25 @@ module JSG
       destination
     end
 
-    def build
+    def build(strip: true)
       system("bundle", "install") or raise Error, "bundle install failed"
-      system("bundle", "exec", "rbwasm", "build", "--ruby-version", WASM_RUBY_VERSION, "-o", "assets/ruby-app.wasm") or
-        raise Error, "rbwasm build failed"
+      system(*rbwasm_build_command) or raise Error, "rbwasm build failed"
+      strip_debug_info if strip
+    end
+
+    # Runs rbwasm with RBWASM_PATCH loaded. The patch is required by absolute
+    # path, so it also works when the Gemfile pins an older jsg.
+    def rbwasm_build_command
+      script = "require #{RBWASM_PATCH.dump}; load Gem.bin_path(\"ruby_wasm\", \"rbwasm\")"
+      ["bundle", "exec", "ruby", "-e", script, "--",
+       "build", "--ruby-version", WASM_RUBY_VERSION, "-o", WASM_OUTPUT]
+    end
+
+    # Drops the DWARF debug info, which is about a third of the wasm file.
+    def strip_debug_info
+      wasm_opt = File.executable?(WASM_OPT) ? WASM_OPT : "wasm-opt"
+      system(wasm_opt, *WASM_OPT_FEATURES, "--strip-debug", WASM_OUTPUT, "-o", WASM_OUTPUT) or
+        raise Error, "#{wasm_opt} --strip-debug failed"
     end
 
     def server(port: 8080)

@@ -13,7 +13,8 @@ RSpec.describe JSG do
 
     it "puts lib/jsg.rb on the load path" do
       expect(spec.require_paths).to eq(["lib"])
-      expect(spec.files).to include("lib/jsg.rb", "lib/jsg/version.rb", "lib/jsg/cli.rb", "lib/jsg/global.rb")
+      expect(spec.files).to include("lib/jsg.rb", "lib/jsg/version.rb", "lib/jsg/cli.rb", "lib/jsg/global.rb",
+                                    "lib/jsg/rbwasm_patch.rb")
     end
 
     it "ships the template that jsg new copies" do
@@ -63,6 +64,11 @@ RSpec.describe JSG do
       expect(script).to include('var name = "@ruby/4.0-wasm-wasi"', "fetch(`assets/ruby-app.wasm`)")
     end
 
+    it "depends on the current jsg release series in the Gemfile" do
+      gemfile = File.read(File.join(create, "Gemfile"))
+      expect(gemfile).to include(%(gem "jsg", "~> #{JSG::VERSION[/\A\d+\.\d+/]}"))
+    end
+
     it "refuses to overwrite an existing folder" do
       Dir.mkdir(File.join(@dir, "taken"))
       expect { JSG::CLI.create_project("taken", dir: @dir) }.to raise_error(JSG::Error, /already exists/)
@@ -77,6 +83,29 @@ RSpec.describe JSG do
       expect(File).to exist(File.join(@dir, "myapp/index.html"))
     end
 
+    it "jsg build builds with the rbwasm patch and strips the debug info" do
+      commands = []
+      allow(JSG::CLI).to receive(:system) { |*args| commands << args }
+      expect(JSG::CLI.run(%w[build])).to eq(0)
+      expect(commands[0]).to eq(%w[bundle install])
+      expect(commands[1].first(4)).to eq(%w[bundle exec ruby -e])
+      expect(commands[1][4]).to include(JSG::CLI::RBWASM_PATCH, 'Gem.bin_path("ruby_wasm", "rbwasm")')
+      expect(commands[1].drop(5)).to eq(%w[-- build --ruby-version 4.0 -o assets/ruby-app.wasm])
+      expect(commands[2]).to include("--strip-debug", "assets/ruby-app.wasm")
+    end
+
+    it "jsg build --no-strip keeps the debug info" do
+      commands = []
+      allow(JSG::CLI).to receive(:system) { |*args| commands << args }
+      expect(JSG::CLI.run(%w[build --no-strip])).to eq(0)
+      expect(commands.size).to eq(2)
+    end
+
+    it "jsg build fails when rbwasm fails" do
+      allow(JSG::CLI).to receive(:system) { |*args| args[2] != "ruby" }
+      expect { expect(JSG::CLI.run(%w[build])).to eq(1) }.to output(/rbwasm build failed/).to_stderr
+    end
+
     it "jsg new without a name fails with usage" do
       expect { expect(JSG::CLI.run(%w[new])).to eq(1) }.to output(/Project name is required/).to_stderr
     end
@@ -87,6 +116,36 @@ RSpec.describe JSG do
 
     it "jsg version prints the version" do
       expect { JSG::CLI.run(%w[version]) }.to output("#{JSG::VERSION}\n").to_stdout
+    end
+  end
+
+  describe "rbwasm patch" do
+    require "jsg/rbwasm_patch"
+
+    it "makes mkmf ignore installed headers when compiling extensions" do
+      features = instance_double(RubyWasm::FeatureSet, support_component_model?: false)
+      product = RubyWasm::CrossRubyExtProduct.new("/src/ext/js", nil, features: features)
+      crossruby = double(ext_build_dir: "/build/ext", build_dir: "/build/ruby", baseruby_path: "/baseruby",
+                         source: double(src_dir: "/checkouts/4.0"))
+      executor = double(mkdir_p: nil)
+      expect(executor).to receive(:system) do |*args, **|
+        expect(args.each_cons(3)).to include(["--disable=gems", "-e", JSG::RbwasmPatch::HOST_HEADERS_FIX])
+        expect(args).to include("-I/build/ruby")
+      end
+      product.do_legacy_extconf(executor, crossruby)
+    end
+
+    it "sends mkmf to the build tree headers" do
+      Dir.mktmpdir do |dir|
+        File.write(File.join(dir, "rbconfig.rb"), <<~RUBY)
+          module RbConfig
+            CONFIG = { "topdir" => #{dir.dump}, "rubyhdrdir" => "/usr/local/include/ruby-4.0.0" }
+          end
+        RUBY
+        out = IO.popen([{ "RUBYOPT" => "" }, RbConfig.ruby, "--disable=gems", "-I#{dir}", "-e", JSG::RbwasmPatch::HOST_HEADERS_FIX,
+                        "-e", 'print RbConfig::CONFIG["rubyhdrdir"]'], &:read)
+        expect(out).to eq(File.join(dir, "include-not-installed"))
+      end
     end
   end
 end
